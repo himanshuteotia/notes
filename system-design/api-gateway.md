@@ -368,5 +368,3 @@ plugins:
 💡 **Pro Tip:** In production, place Kong behind a **Cloudflare CDN** for DDoS protection and enhanced caching.
 
 ---
-
-Would you like me to create the **complete codebase** in the canvas for you? 🚀
