@@ -269,3 +269,61 @@ Now, we will **consume the generator** to fetch and process paginated data.
 - **Why Generators?** They allow us to **pause and resume execution**, making them ideal for handling **large datasets**.
 - **Why `for await...of`?** It handles **asynchronous iteration** cleanly.
 - **Why Use Generators Instead of Arrays?** Arrays store all data in memory, but **generators fetch data on demand**, making them **memory-efficient**.
+
+
+Does `await` is same as `yield`?
+
+### ✅ When we use `await` in a function:
+It **does not use generator functions** behind the scenes directly, but the idea is **similar**.
+
+---
+
+### 🔍 What's really happening?
+
+When you write:
+
+```js
+async function myFunc() {
+  const result = await someAsyncTask();
+  console.log(result);
+}
+```
+
+JavaScript **transforms** this `async/await` code into something similar to how generator functions work (under the hood), but it's using **Promises**.
+
+---
+
+### ⚙️ Is it a generator function behind the scenes?
+
+**Not exactly**, but the underlying behavior is **inspired by generators**.
+
+- A generator function uses `yield` to pause execution.
+- An `async` function uses `await` to pause **until a Promise resolves**.
+
+---
+
+### 🧠 So what happens when `await` is used?
+
+1. The function **pauses** at `await`.
+2. It **does not block** other code.
+3. It **waits** for the Promise to resolve or reject.
+4. Once it's done, execution **resumes from that point**.
+
+---
+
+### 🧪 Behind the scenes:
+In Babel (or TypeScript when transpiled), `async/await` might be **converted to generators + a Promise runner**, like this:
+
+```js
+function* myGenerator() {
+  const result = yield someAsyncTask();
+  console.log(result);
+}
+```
+
+But modern JavaScript engines like V8 (used in Node.js and Chrome) have **native support** for `async/await`, so they don’t need to use generators anymore.
+
+---
+
+### 🟢 Conclusion:
+> Using `await` does not literally mean JavaScript is using a generator, but the **concept is similar**: pause → wait → resume.
