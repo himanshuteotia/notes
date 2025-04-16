@@ -403,3 +403,210 @@ async delete(@Param('id') id: string) {
 | PUT    | `/user/:id`       | Update existing user  |
 | DELETE | `/user/:id`       | Delete user by ID     |
 
+
+
+Now let’s go **step-by-step to build full JWT Authentication** in NestJS. This will include:
+
+✅ Signup → 🔐 Login → 🎟️ JWT Token → 🛡️ Guard-protected route
+
+---
+
+## 🔐 Step-by-Step: Full JWT Auth in NestJS
+
+### 📦 Step 1: Install Packages
+```bash
+npm install @nestjs/jwt @nestjs/passport passport passport-jwt bcrypt
+npm install --save-dev @types/passport-jwt @types/bcrypt
+```
+
+---
+
+## 👤 Step 2: Create `AuthModule`
+
+```bash
+nest g module auth
+nest g service auth
+nest g controller auth
+```
+
+---
+
+## 🔒 Step 3: Create User Auth DTOs
+
+#### `auth/dto/signup.dto.ts`
+```ts
+import { IsEmail, IsNotEmpty } from 'class-validator';
+
+export class SignupDto {
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  password: string;
+}
+```
+
+#### `auth/dto/login.dto.ts`
+```ts
+import { IsEmail, IsNotEmpty } from 'class-validator';
+
+export class LoginDto {
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty()
+  password: string;
+}
+```
+
+---
+
+## 🧠 Step 4: User Model + Password Hashing
+
+In `user.schema.ts`:
+```ts
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
+import * as bcrypt from 'bcrypt';
+
+export type UserDocument = User & Document;
+
+@Schema()
+export class User {
+  @Prop({ required: true, unique: true })
+  email: string;
+
+  @Prop({ required: true })
+  password: string;
+}
+
+export const UserSchema = SchemaFactory.createForClass(User);
+
+// hash password before save
+UserSchema.pre<UserDocument>('save', async function (next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  next();
+});
+```
+
+---
+
+## 🔑 Step 5: AuthService – Signup + Login
+
+#### `auth.service.ts`
+```ts
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import * as bcrypt from 'bcrypt';
+import { User, UserDocument } from '../user/user.schema';
+import { SignupDto } from './dto/signup.dto';
+import { LoginDto } from './dto/login.dto';
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private jwtService: JwtService,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+  ) {}
+
+  async signup(dto: SignupDto) {
+    const user = new this.userModel(dto);
+    await user.save();
+    return this.signToken(user._id, user.email);
+  }
+
+  async login(dto: LoginDto) {
+    const user = await this.userModel.findOne({ email: dto.email });
+    if (!user || !(await bcrypt.compare(dto.password, user.password))) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    return this.signToken(user._id, user.email);
+  }
+
+  private signToken(userId: string, email: string) {
+    const payload = { sub: userId, email };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+}
+```
+
+---
+
+## 🧬 Step 6: AuthController – Signup + Login Routes
+
+#### `auth.controller.ts`
+```ts
+import { Body, Controller, Post } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { SignupDto } from './dto/signup.dto';
+import { LoginDto } from './dto/login.dto';
+
+@Controller('auth')
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
+
+  @Post('signup')
+  signup(@Body() dto: SignupDto) {
+    return this.authService.signup(dto);
+  }
+
+  @Post('login')
+  login(@Body() dto: LoginDto) {
+    return this.authService.login(dto);
+  }
+}
+```
+
+---
+
+## 🔧 Step 7: Configure JWT in `auth.module.ts`
+
+```ts
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
+import { MongooseModule } from '@nestjs/mongoose';
+import { User, UserSchema } from '../user/user.schema';
+
+@Module({
+  imports: [
+    JwtModule.register({
+      secret: 'your-secret-key',
+      signOptions: { expiresIn: '1d' },
+    }),
+    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+  ],
+  controllers: [AuthController],
+  providers: [AuthService],
+})
+export class AuthModule {}
+```
+
+---
+
+## 🛡️ Step 8: Protect Routes with JWT Guard
+
+Use previous `jwt.strategy.ts` and `jwt-auth.guard.ts`.
+
+Then in any controller:
+```ts
+@UseGuards(JwtAuthGuard)
+@Get('me')
+getProfile(@Request() req) {
+  return req.user;
+}
+```
+
+---
+
+## ✅ Result
+
+1. **POST `/auth/signup`** with `{ email, password }` → returns JWT  
+2. **POST `/auth/login`** → returns JWT  
+3. **GET `/user/me`** → pass `Authorization: Bearer <token>` → returns user info
