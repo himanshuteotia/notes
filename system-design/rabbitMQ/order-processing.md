@@ -250,210 +250,242 @@ Each consumer must be **idempotent**:
 | Notification SVC  | `order.*`               | —                        |
 | Shipping SVC      | `order.payment_success` | `order.shipped`          |
 
----
 
-## ✅ Advantages of This RabbitMQ Design
+Here's a **complete folder & code structure** for a real-world **e-commerce Order Servicing system** using **RabbitMQ** in **Node.js**.
 
-- **Loose coupling**: Each service is independent.
-- **Scalable**: Add more consumers per service.
-- **Reliable**: DLQ + retries = robust pipeline.
-- **Traceable**: Easy to monitor events through queues.
 
-Awesome! Let’s now move to the **next level of RabbitMQ**.
+## 🗂️ Folder Structure
 
----
-
-## 🧭 Overview of Exchange Types
-
-RabbitMQ has different **exchange types** that define **how messages are routed** to queues:
-
-| Exchange Type | Use Case                                                   | Example                                                 |
-|---------------|-------------------------------------------------------------|----------------------------------------------------------|
-| `direct`      | Route to queue with exact **routing key match**            | Send logs of level `error` to a specific queue           |
-| `fanout`      | **Broadcast** to all queues                                 | Send notification to all services (SMS, Email, App)      |
-| `topic`       | **Pattern-based routing** with `.` as separator             | Route messages like `user.created` or `user.deleted`     |
-| `headers`     | Match based on message headers (rarely used)                | Match on metadata like `department: HR`, `type: urgent`  |
-
-We’ll now see **examples** in JS for all 3 common types.
-
----
-
-## 1️⃣ `Direct Exchange` Example
-
-💡 **Send message to a queue if routing key matches exactly**
-
-### Producer
-
-```js
-const amqp = require('amqplib');
-
-async function directProducer() {
-  const connection = await amqp.connect('amqp://localhost');
-  const channel = await connection.createChannel();
-
-  const exchange = 'logs_direct';
-  const routingKey = 'error';
-  const message = 'This is an error log!';
-
-  await channel.assertExchange(exchange, 'direct', { durable: false });
-  channel.publish(exchange, routingKey, Buffer.from(message));
-
-  console.log(`Sent message with key "${routingKey}":`, message);
-  await channel.close();
-  await connection.close();
-}
-
-directProducer();
+```
+ecommerce-order-system/
+├── docker-compose.yml
+├── rabbitmq/
+│   └── docker-configs (optional)
+├── shared/
+│   └── rabbitmq.js        ← shared RabbitMQ connection util
+├── services/
+│   ├── order-service/
+│   │   ├── index.js
+│   │   └── orderPublisher.js
+│   ├── inventory-service/
+│   │   └── inventoryConsumer.js
+│   ├── payment-service/
+│   │   └── paymentConsumer.js
+│   ├── notification-service/
+│   │   └── notificationConsumer.js
+│   └── shipping-service/
+│       └── shippingConsumer.js
 ```
 
-### Consumer
+---
+
+## 🐇 1. RabbitMQ Setup via Docker
+
+```yaml
+# docker-compose.yml
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672 # UI access: http://localhost:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+```
+
+---
+
+## 🔗 2. Shared RabbitMQ Utility
 
 ```js
+// shared/rabbitmq.js
 const amqp = require('amqplib');
 
-async function directConsumer() {
-  const connection = await amqp.connect('amqp://localhost');
-  const channel = await connection.createChannel();
+let channel;
 
-  const exchange = 'logs_direct';
-  const routingKey = 'error';
+async function getChannel() {
+  if (channel) return channel;
 
-  await channel.assertExchange(exchange, 'direct', { durable: false });
-  const q = await channel.assertQueue('', { exclusive: true }); // Temporary queue
+  const conn = await amqp.connect('amqp://localhost');
+  channel = await conn.createChannel();
+  await channel.assertExchange('order_events', 'topic', { durable: true });
+  return channel;
+}
 
-  await channel.bindQueue(q.queue, exchange, routingKey);
+module.exports = { getChannel };
+```
 
-  console.log('Waiting for messages...');
-  channel.consume(q.queue, (msg) => {
-    if (msg.content) {
-      console.log(`Received [${msg.fields.routingKey}]:`, msg.content.toString());
-    }
+---
+
+## 📦 3. Order Service (Producer)
+
+```js
+// services/order-service/orderPublisher.js
+const { getChannel } = require('../../shared/rabbitmq');
+
+async function publishOrder(orderData) {
+  const channel = await getChannel();
+  channel.publish(
+    'order_events',
+    'order.created',
+    Buffer.from(JSON.stringify(orderData))
+  );
+  console.log('📦 Order Created:', orderData);
+}
+
+publishOrder({
+  orderId: 'ORD001',
+  userId: 'USER123',
+  items: ['apple', 'banana'],
+});
+```
+
+---
+
+## 🧾 4. Inventory Service
+
+```js
+// services/inventory-service/inventoryConsumer.js
+const { getChannel } = require('../../shared/rabbitmq');
+
+async function consume() {
+  const channel = await getChannel();
+  const q = 'inventory_queue';
+
+  await channel.assertQueue(q, { durable: true });
+  channel.bindQueue(q, 'order_events', 'order.created');
+
+  channel.consume(q, (msg) => {
+    const order = JSON.parse(msg.content.toString());
+    console.log('📦 Inventory checking for:', order.orderId);
+
+    // ... Check & Reserve inventory
+
+    channel.publish(
+      'order_events',
+      'order.inventory_checked',
+      Buffer.from(JSON.stringify({
+        orderId: order.orderId,
+        status: 'success',
+      }))
+    );
+
+    channel.ack(msg);
   });
 }
 
-directConsumer();
+consume();
 ```
 
 ---
 
-## 2️⃣ `Fanout Exchange` Example
-
-💡 **Send message to all queues, routing key is ignored**
-
-### Producer
+## 💳 5. Payment Service
 
 ```js
-const amqp = require('amqplib');
+// services/payment-service/paymentConsumer.js
+const { getChannel } = require('../../shared/rabbitmq');
 
-async function fanoutProducer() {
-  const connection = await amqp.connect('amqp://localhost');
-  const channel = await connection.createChannel();
+async function consume() {
+  const channel = await getChannel();
+  const q = 'payment_queue';
 
-  const exchange = 'logs_fanout';
-  const message = 'Broadcast: System will go down for maintenance!';
+  await channel.assertQueue(q, { durable: true });
+  channel.bindQueue(q, 'order_events', 'order.inventory_checked');
 
-  await channel.assertExchange(exchange, 'fanout', { durable: false });
-  channel.publish(exchange, '', Buffer.from(message));
+  channel.consume(q, (msg) => {
+    const data = JSON.parse(msg.content.toString());
+    console.log('💳 Processing payment for:', data.orderId);
 
-  console.log('Broadcasted:', message);
-  await channel.close();
-  await connection.close();
-}
+    // Simulate success
+    channel.publish(
+      'order_events',
+      'order.payment_success',
+      Buffer.from(JSON.stringify({ orderId: data.orderId }))
+    );
 
-fanoutProducer();
-```
-
-### Consumer
-
-```js
-const amqp = require('amqplib');
-
-async function fanoutConsumer() {
-  const connection = await amqp.connect('amqp://localhost');
-  const channel = await connection.createChannel();
-
-  const exchange = 'logs_fanout';
-
-  await channel.assertExchange(exchange, 'fanout', { durable: false });
-  const q = await channel.assertQueue('', { exclusive: true });
-
-  await channel.bindQueue(q.queue, exchange, '');
-
-  console.log('Waiting for broadcast messages...');
-  channel.consume(q.queue, (msg) => {
-    if (msg.content) {
-      console.log('Received:', msg.content.toString());
-    }
+    channel.ack(msg);
   });
 }
 
-fanoutConsumer();
+consume();
 ```
 
 ---
 
-## 3️⃣ `Topic Exchange` Example
-
-💡 **Routing based on pattern** (e.g. `user.*`, `user.created`)
-
-### Producer
+## 📬 6. Notification Service
 
 ```js
-const amqp = require('amqplib');
+// services/notification-service/notificationConsumer.js
+const { getChannel } = require('../../shared/rabbitmq');
 
-async function topicProducer() {
-  const connection = await amqp.connect('amqp://localhost');
-  const channel = await connection.createChannel();
+async function consume() {
+  const channel = await getChannel();
+  const q = 'notification_queue';
 
-  const exchange = 'logs_topic';
-  const routingKey = 'user.created';
-  const message = 'New user created!';
+  await channel.assertQueue(q, { durable: true });
+  channel.bindQueue(q, 'order_events', 'order.*'); // catch all order events
 
-  await channel.assertExchange(exchange, 'topic', { durable: false });
-  channel.publish(exchange, routingKey, Buffer.from(message));
-
-  console.log(`Sent message with key "${routingKey}":`, message);
-  await channel.close();
-  await connection.close();
-}
-
-topicProducer();
-```
-
-### Consumer (for all `user.*` messages)
-
-```js
-const amqp = require('amqplib');
-
-async function topicConsumer() {
-  const connection = await amqp.connect('amqp://localhost');
-  const channel = await connection.createChannel();
-
-  const exchange = 'logs_topic';
-  const pattern = 'user.*'; // Match all user events
-
-  await channel.assertExchange(exchange, 'topic', { durable: false });
-  const q = await channel.assertQueue('', { exclusive: true });
-
-  await channel.bindQueue(q.queue, exchange, pattern);
-
-  console.log('Waiting for pattern-based messages...');
-  channel.consume(q.queue, (msg) => {
-    if (msg.content) {
-      console.log(`Received [${msg.fields.routingKey}]:`, msg.content.toString());
-    }
+  channel.consume(q, (msg) => {
+    const data = JSON.parse(msg.content.toString());
+    console.log('📨 Sending notification for:', data.orderId);
+    channel.ack(msg);
   });
 }
 
-topicConsumer();
+consume();
 ```
 
 ---
 
-## 📌 Summary
+## 🚚 7. Shipping Service
 
-| Type     | Key Feature                   | Routing Key Example    |
-|----------|-------------------------------|-------------------------|
-| direct   | Exact match                   | `'error'`, `'info'`     |
-| fanout   | Send to all queues            | `''` (ignored)          |
-| topic    | Wildcard-based routing        | `'user.*'`, `'order.#'` |
+```js
+// services/shipping-service/shippingConsumer.js
+const { getChannel } = require('../../shared/rabbitmq');
+
+async function consume() {
+  const channel = await getChannel();
+  const q = 'shipping_queue';
+
+  await channel.assertQueue(q, { durable: true });
+  channel.bindQueue(q, 'order_events', 'order.payment_success');
+
+  channel.consume(q, (msg) => {
+    const data = JSON.parse(msg.content.toString());
+    console.log('🚚 Shipping started for order:', data.orderId);
+
+    channel.publish(
+      'order_events',
+      'order.shipped',
+      Buffer.from(JSON.stringify({ orderId: data.orderId }))
+    );
+
+    channel.ack(msg);
+  });
+}
+
+consume();
+```
+
+---
+
+## 🧪 To Run:
+
+1. Start RabbitMQ:  
+   ```bash
+   docker-compose up
+   ```
+
+2. Open RabbitMQ UI:  
+   [http://localhost:15672](http://localhost:15672) (user/pass: guest)
+
+3. Run services individually:
+   ```bash
+   node services/order-service/orderPublisher.js
+   node services/inventory-service/inventoryConsumer.js
+   node services/payment-service/paymentConsumer.js
+   node services/notification-service/notificationConsumer.js
+   node services/shipping-service/shippingConsumer.js
+   ```
