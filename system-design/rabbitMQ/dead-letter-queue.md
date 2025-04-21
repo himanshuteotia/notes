@@ -1,4 +1,4 @@
-Let’s now dive into **Retry Mechanism, DLQ (Dead Letter Queue), Delayed Messages, and how RabbitMQ fits into microservices** — all with simple JavaScript examples. 💥
+**Retry Mechanism, DLQ (Dead Letter Queue), Delayed Messages, and how RabbitMQ fits into microservices** — all with simple JavaScript examples. 💥
 
 ---
 
