@@ -466,3 +466,154 @@ Allowing a service to finish in-flight requests before shutting down, preventing
 ### ✅ **75. Vertical Slice Architecture**
 **Definition:**  
 Organizing code by feature instead of layers (e.g., instead of `controllers/`, `services/`, you have `user/`, `orders/` etc.).
+
+
+### ✅ **76. Cold Start**
+**Definition:**  
+The delay that occurs when a function or container starts from scratch, commonly seen in serverless architectures (e.g., AWS Lambda).
+
+---
+
+### ✅ **77. Multitenancy**
+**Definition:**  
+A single system serves multiple tenants (clients) with data isolation and shared infrastructure.
+
+---
+
+### ✅ **78. TSO (Timestamp Oracle)**
+**Definition:**  
+A centralized timestamp provider in distributed systems (e.g., in Spanner) for consistent ordering of events.
+
+---
+
+### ✅ **79. Federated Identity**
+**Definition:**  
+A system that allows users to authenticate across multiple systems using a single identity (e.g., SSO with OAuth2).
+
+---
+
+### ✅ **80. Sticky Bit (in storage)**
+**Definition:**  
+A permission that restricts deletion of a file in a shared directory to the file's owner or root.
+
+---
+
+### ✅ **81. Service Mesh**
+**Definition:**  
+An infrastructure layer (e.g., Istio, Linkerd) to manage service-to-service communication with features like observability, retries, mTLS, and routing.
+
+---
+
+### ✅ **82. mTLS (Mutual TLS)**
+**Definition:**  
+Both client and server authenticate each other using TLS certificates — ensures end-to-end encryption and identity.
+
+---
+
+### ✅ **83. Helm**
+**Definition:**  
+A package manager for Kubernetes that helps you define, install, and upgrade complex K8s applications.
+
+---
+
+### ✅ **84. Side Effect Free (Pure Function)**
+**Definition:**  
+A function that doesn’t modify external state and returns the same output given the same input — useful in deterministic systems.
+
+---
+
+### ✅ **85. Green Thread**
+**Definition:**  
+Threads scheduled by a user-space runtime (e.g., Go routines), not by the OS — lightweight and performant.
+
+---
+
+### ✅ **86. Vertical Slice Testing**
+**Definition:**  
+Tests that cover the full stack of a single use-case (e.g., from controller to DB) instead of mocking everything.
+
+---
+
+### ✅ **87. Snowflake ID**
+**Definition:**  
+Globally unique, time-based IDs generated using high-scale strategies (e.g., Twitter Snowflake).
+
+---
+
+### ✅ **88. Shared-Nothing Architecture**
+**Definition:**  
+Each node is independent and self-sufficient — no shared memory or disk, improving scalability and fault isolation.
+
+---
+
+### ✅ **89. Write Skew**
+**Definition:**  
+A consistency anomaly where concurrent writes create an invalid state even when individually they appear valid — solved by serializability or strong consistency.
+
+---
+
+### ✅ **90. Append-Only Log**
+**Definition:**  
+A log structure where new data is only added — commonly used in Kafka, event sourcing, and databases like Cassandra.
+
+---
+
+### ✅ **91. Quorum**
+**Definition:**  
+The minimum number of nodes that must agree for a distributed operation to proceed (e.g., majority vote in Raft/Paxos).
+
+---
+
+### ✅ **92. Two-Phase Commit (2PC)**
+**Definition:**  
+A protocol for atomic distributed transactions, involving a **prepare** and **commit/abort** phase.
+
+---
+
+### ✅ **93. Distributed Tracing**
+**Definition:**  
+Tracking the full journey of a request as it passes through different services — tools: Jaeger, Zipkin, OpenTelemetry.
+
+---
+
+### ✅ **94. Cluster Singleton**
+**Definition:**  
+A service or component that runs **only once across a cluster** — used for leader-only tasks.
+
+---
+
+### ✅ **95. Slow Path / Fast Path**
+**Definition:**  
+- **Fast Path:** Optimized common case (e.g., cache hit)  
+- **Slow Path:** Full processing logic (e.g., DB lookup)
+
+---
+
+### ✅ **96. Conflation**
+**Definition:**  
+Combining multiple changes into one update, especially useful in high-frequency data systems like real-time dashboards.
+
+---
+
+### ✅ **97. Circuit Trip**
+**Definition:**  
+When a circuit breaker opens (trips), it prevents further calls until a reset condition is met.
+
+---
+
+### ✅ **98. Materialized View**
+**Definition:**  
+A database view that stores computed results for fast access, typically updated asynchronously or periodically.
+
+---
+
+### ✅ **99. Sticky Partitioning**
+**Definition:**  
+In Kafka or event processing, always routing a specific key (e.g., user ID) to the same partition to maintain order.
+
+---
+
+### ✅ **100. Zero Downtime Deployment**
+**Definition:**  
+Releasing new code without affecting system availability — often achieved with blue-green or rolling updates.
+
