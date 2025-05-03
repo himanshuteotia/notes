@@ -238,7 +238,3 @@ But all other kids go to the same shops as before. ✅
 * Hash value = Position on road
 * Rule = Go to next shop clockwise
 * Only a few users change when a shop is added or removed.
-
----
-
-Would you like me to now write **interview notes on this with diagrams** and save it?
