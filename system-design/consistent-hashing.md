@@ -190,3 +190,55 @@ console.log('Key2 after removing NodeB =>', ch.getNode('Key2'));
 - **Sharding in Databases (using Consistent Hashing)?**
 - **Load Balancing Techniques?**
 - **CAP Theorem in Distributed Systems?**
+
+
+Let’s go even simpler — with a **real-world example**.
+
+---
+
+### 🧊 Ice Cream Shops Around a Circular Road
+
+Imagine there’s a **circular road** (like a ring). On this road, there are 3 ice cream shops placed like this:
+
+* 🏪 Shop A at 100 meters
+* 🏪 Shop B at 200 meters
+* 🏪 Shop C at 300 meters
+
+Now, a kid (like your key or user) is standing at **150 meters**. The rule is:
+
+> Go to the **next shop clockwise** on the road.
+
+So the kid at **150m** will go to Shop B (at 200m).
+Another kid at **250m** will go to Shop C (at 300m).
+And a kid at **310m** goes back around the circle to Shop A (at 100m).
+
+This is **how the hash ring works**.
+
+---
+
+### 🔁 What if a new shop is added?
+
+Say you add:
+
+* 🏪 Shop D at 260 meters
+
+Now:
+
+* The kid at 250m now goes to Shop D instead of Shop C.
+
+But all other kids go to the same shops as before. ✅
+
+---
+
+### 🧠 Final Understanding
+
+* Servers = Shops
+* User or Data = Kid
+* Hash ring = Circular road
+* Hash value = Position on road
+* Rule = Go to next shop clockwise
+* Only a few users change when a shop is added or removed.
+
+---
+
+Would you like me to now write **interview notes on this with diagrams** and save it?
