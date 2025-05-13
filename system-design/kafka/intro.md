@@ -1,7 +1,3 @@
-Here’s a simple **Kafka introduction** in easy-to-understand English:
-
----
-
 ## 📌 What is Apache Kafka?
 
 Apache Kafka is an **open-source distributed event streaming platform**. It is used to **send, receive, store, and process messages (data)** in real-time.
