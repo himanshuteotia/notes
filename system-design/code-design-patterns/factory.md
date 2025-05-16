@@ -1,4 +1,4 @@
-Awesome! Let’s now dive into the **Factory Design Pattern**, which is super useful for creating objects when you want to **hide object creation logic** and **return different types** based on some condition.
+**Factory Design Pattern**, which is super useful for creating objects when you want to **hide object creation logic** and **return different types** based on some condition.
 
 ---
 
