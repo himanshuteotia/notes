@@ -115,3 +115,158 @@ const Child = React.memo(({ onClick }) => {
 ```
 
 Passing `handleClick` created with `useCallback` avoids re-rendering `Child` on every parent update.
+
+---
+
+### 🔁 What it means:
+
+> **“`useMemo` caches the value returned by a function”**
+> means that React will **save (or "memoize") the result of a function** so that it **doesn't run the function again unless needed**.
+
+---
+
+### 🧠 Real-world analogy:
+
+Imagine you're doing a hard math problem, like `1000 * 1234`.
+
+* The first time, you solve it (takes effort).
+* You write the answer on paper: `1234000`.
+* Next time someone asks, instead of solving again, you **just read it from the paper** — that's caching!
+
+---
+
+### ✅ React version:
+
+```js
+const result = useMemo(() => 1000 * 1234, []);
+```
+
+* First render: React runs the function → `1000 * 1234` → result is `1234000`.
+* Stores (caches) that value.
+* On the next render, it **doesn't recalculate** `1000 * 1234` again, unless the dependencies change.
+
+---
+
+### ⚠️ Without `useMemo`:
+
+Every render would **recalculate** the value — even if nothing changed. This can slow down performance, especially for **heavy calculations**.
+
+
+> ❌ **No**, you **cannot do the same with `useCallback`** — because `useCallback` is for **functions**, not **values**.
+
+---
+
+### 🔁 Comparison by Example:
+
+#### ✅ `useMemo` – Caches a value
+
+```jsx
+const result = useMemo(() => 1000 * 1234, []);
+// result is a number: 1234000
+```
+
+#### 🔁 `useCallback` – Caches a function
+
+```jsx
+const multiply = useCallback(() => 1000 * 1234, []);
+// multiply is a function you can call: multiply()
+```
+
+So if you want the **value now**, use `useMemo`.
+If you want to **remember a function** to call later, use `useCallback`.
+
+---
+
+### 🔧 When to Use Each
+
+| Goal                        | Hook to Use   |
+| --------------------------- | ------------- |
+| Avoid recalculating a value | `useMemo`     |
+| Avoid recreating a function | `useCallback` |
+
+---
+
+### 🎯 Example to Understand Better
+
+#### ❌ Wrong: Using `useCallback` to get a value
+
+```js
+const getValue = useCallback(() => 1000 * 1234, []);
+console.log(getValue); // returns a function
+console.log(getValue()); // returns 1234000
+```
+
+You must call it manually — not helpful if you just want the value.
+
+#### ✅ Right: Using `useMemo`
+
+```js
+const value = useMemo(() => 1000 * 1234, []);
+console.log(value); // directly gives 1234000
+```
+
+---
+
+So in short:
+
+* 🧠 `useMemo`: "Give me the result and cache it."
+* 🛠 `useCallback`: "Give me the function and cache it."
+
+---
+
+## ✅ What it really means
+
+### 🧠 `useMemo`
+
+> "Run the function **now**, get the **value**, and cache that **value**."
+
+```js
+const value = useMemo(() => 5 + 10, []);
+// value is 15
+```
+
+* The arrow function `() => 5 + 10` is called immediately.
+* React stores (caches) the result: `15`.
+
+You get **the value directly**: `value === 15`.
+
+---
+
+### 🛠 `useCallback`
+
+> "Don’t run the function now. Just **remember (cache)** the **function itself**."
+
+```js
+const getValue = useCallback(() => 5 + 10, []);
+// getValue is a function
+```
+
+* Nothing is calculated yet.
+* You only have a reference to the function: `() => 5 + 10`.
+
+To get the result, you still need to **call it**:
+
+```js
+const result = getValue(); // result === 15
+```
+
+So `useCallback` gives you a **function**, not the result.
+
+---
+
+## 🧪 Summary Table
+
+| Hook          | What it returns         | When it runs the function         |
+| ------------- | ----------------------- | --------------------------------- |
+| `useMemo`     | The **value/result**    | Immediately on render (if needed) |
+| `useCallback` | The **function itself** | Only runs when you **call** it    |
+
+---
+
+## 💡 Real-Life Analogy
+
+| Hook          | Analogy                                                       |
+| ------------- | ------------------------------------------------------------- |
+| `useMemo`     | You do the math `5 + 10`, write `15` on paper and reuse it.   |
+| `useCallback` | You write a **calculator** on paper, so you can use it later. |
+
