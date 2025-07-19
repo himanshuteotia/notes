@@ -29,8 +29,11 @@ With **Concurrent Rendering**:
 ### ✅ Key Benefits
 
 ➭ Smoother UI even with heavy components
+
 ➭ Better handling of slow devices or network
+
 ➭ Enables **features like Suspense** (for data fetching)
+
 ➭ Helps **Streaming SSR** (Server-Side Rendering)
 
 ---
