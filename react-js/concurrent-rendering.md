@@ -80,4 +80,60 @@ Here:
 
 * Typing feels smooth because list generation is **deferred**.
 
+* This code demonstrates **React’s Concurrent Rendering with `useTransition`**. Let’s break down what’s happening step by step:
 
+---
+
+### ✅ What the Code Does
+
+* It renders an **input box** and a **large list of items** (20,000 entries).
+* When you type in the input, it:
+
+  1. Updates the input value immediately (**high-priority update**).
+  2. Updates the large list **as a low-priority task** using `startTransition`.
+
+---
+
+### ✅ Why Use `useTransition`?
+
+If React tried to render 20,000 `<li>` items **synchronously** on every keystroke:
+
+* The UI would freeze while rendering.
+* Typing would feel **laggy**.
+
+With `useTransition`:
+
+* The input update happens **right away** (keeps UI responsive).
+* The heavy list update is **deferred** (scheduled with lower priority).
+* `isPending` becomes `true` while the list is updating → shows **“Loading…”**.
+
+---
+
+### ✅ How It Works in the Code
+
+```jsx
+const [input, setInput] = useState("");   // For input field
+const [list, setList] = useState([]);     // For the big list
+const [isPending, startTransition] = useTransition();
+```
+
+* `startTransition(() => { ... })` → Marks the callback as **non-urgent**.
+
+* Inside it, the code creates `items` (20,000 elements) and updates state:
+
+  ```js
+  const items = Array.from({ length: 20000 }, (_, i) => e.target.value + i);
+  setList(items);
+  ```
+
+* `isPending` is `true` while React works on this **low-priority update**.
+
+* Once done, `isPending` becomes `false` and removes the loading message.
+
+---
+
+### ✅ Why Is This Useful?
+
+* Keeps typing **fast** and **non-blocking**.
+* Improves **UX** when updating big UI chunks.
+* Demonstrates **Concurrent Rendering** in action.
