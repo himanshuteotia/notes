@@ -72,6 +72,7 @@ If Payment Service fails temporarily, the Order Service might queue payments and
 ### Real Benefits (and Trade-offs):
 
 **Benefits:**
+
 ➭ Easier scaling (scale specific parts independently).
 
 ➭ Smaller deployments (quicker updates, fewer risks).
@@ -81,6 +82,7 @@ If Payment Service fails temporarily, the Order Service might queue payments and
 ➭ Clear boundaries for teams (promotes autonomy and accountability).
 
 **Trade-offs:**
+
 ➭ Complexity in managing many services.
 
 ➭ Requires robust infrastructure for communication, monitoring, and logging.
