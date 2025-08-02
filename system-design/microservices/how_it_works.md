@@ -48,6 +48,7 @@ In a microservices setup, services need to find and communicate with each other 
 ### ➅ Scalability and Deployment
 
 ➭ Microservices are deployed independently (often using containers like Docker), allowing scaling based on individual service load.
+
 ➭ Managed using orchestration tools like Kubernetes or cloud-managed services (AWS ECS, GKE, Azure AKS).
 
 ### ➆ Fault Tolerance and Resilience
