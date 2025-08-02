@@ -13,7 +13,9 @@ Here’s the thing—microservices aren’t just about technology. They’re als
 ### ➁ Independent Services
 
 ➭ Each service runs independently with its own logic, database, and resources.
+
 ➭ Teams can deploy, manage, and scale each one separately.
+
 ➭ They’re typically designed around business capabilities (user-service, billing-service, inventory-service, etc.).
 
 ### ➂ Communication Between Services
