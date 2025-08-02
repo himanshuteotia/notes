@@ -7,6 +7,7 @@ Here’s the thing—microservices aren’t just about technology. They’re als
 ### ➀ Breaking Down the Application
 
 ➭ **Monolithic approach:** One big codebase handles everything—front-end, backend logic, and databases.
+
 ➭ **Microservices approach:** Breaks the system into specialized, self-contained services like user-authentication, payment processing, or notification handling.
 
 ### ➁ Independent Services
@@ -34,6 +35,7 @@ Services communicate primarily through APIs, usually over HTTP (REST) or message
 ### ➃ Independent Data Management
 
 ➭ Each microservice manages its own database. No direct access from other services.
+
 ➭ Different services can use different databases (MongoDB, PostgreSQL, Redis, Elasticsearch), optimizing each for their specific needs.
 
 ### ➄ Service Discovery
@@ -68,13 +70,18 @@ If Payment Service fails temporarily, the Order Service might queue payments and
 
 **Benefits:**
 ➭ Easier scaling (scale specific parts independently).
+
 ➭ Smaller deployments (quicker updates, fewer risks).
+
 ➭ Technology flexibility (use different languages or tools per service).
+
 ➭ Clear boundaries for teams (promotes autonomy and accountability).
 
 **Trade-offs:**
 ➭ Complexity in managing many services.
+
 ➭ Requires robust infrastructure for communication, monitoring, and logging.
+
 ➭ Additional operational overhead for managing deployments.
 
 ---
