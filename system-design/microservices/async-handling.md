@@ -1,5 +1,3 @@
-Great question—let’s clarify this clearly, step-by-step, because this scenario is exactly how many real-world microservices operate effectively.
-
 ### Here’s the Scenario:
 
 You have a user-facing synchronous call (like placing an order), and once that initial request succeeds, multiple other services kick off asynchronously (like inventory update, sending notifications, analytics logging).
