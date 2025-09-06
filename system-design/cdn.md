@@ -7,7 +7,9 @@ Here’s why it exists: if TikTok stored all its videos in one data center in th
 ### How it works
 
 ➭ You upload a video → it’s stored in an origin server (main storage).
+
 ➭ The CDN copies that video into **edge servers** around the globe.
+
 ➭ When a user requests the video, they get it from the nearest edge server instead of the origin.
 
 ---
@@ -15,8 +17,11 @@ Here’s why it exists: if TikTok stored all its videos in one data center in th
 ### Benefits
 
 ➭ **Low latency**: Data travels a shorter distance, so playback feels instant.
+
 ➭ **High availability**: If one server goes down, others serve the content.
+
 ➭ **Reduced load** on origin servers, since edges handle most requests.
+
 ➭ **Scalability**: CDNs are built to handle millions/billions of requests.
 
 ---
@@ -24,7 +29,9 @@ Here’s why it exists: if TikTok stored all its videos in one data center in th
 ### What CDNs usually serve
 
 ➭ Static content: images, CSS, JavaScript files, videos.
+
 ➭ Streaming media (like TikTok, YouTube, Netflix).
+
 ➭ Sometimes even dynamic content with edge computing.
 
 ---
