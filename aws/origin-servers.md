@@ -1,6 +1,3 @@
-Good — let’s zoom in on the **origin server** itself.
-
----
 
 ### Definition
 
