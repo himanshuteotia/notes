@@ -1,4 +1,4 @@
-Here's a clear and organized list of **distributed system tools** and what each is used for. This will help you simulate real AWS/cloud-like deployments **locally** and understand their **production use** too.
+List of **distributed system tools** and what each is used for. This will help you simulate real AWS/cloud-like deployments **locally** and understand their **production use** too.
 
 ---
 
