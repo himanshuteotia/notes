@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # This step converts all Markdown in the "notes" folder
+      - name: Convert all notes to PDF/HTML
+        uses: BaileyJM02/markdown-to-pdf@v1
+        with:
+          # this path should be where your Markdown files live
+          input_path: notes
+
+          # optional: where you want the generated files
+          output_path: pdfs
+
+      # upload them as artifacts so you can download them after the run
+      - name: Upload generated PDFs/HTML
+        uses: actions/upload-artifact@v3
+        with:
+          name: notes-pdfs
+          path: pdfs
