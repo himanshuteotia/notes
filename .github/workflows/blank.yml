@@ -17,7 +17,7 @@ jobs:
         uses: BaileyJM02/markdown-to-pdf@v1
         with:
           # this path should be where your Markdown files live
-          input_path: notes
+          input_path: preperation
 
           # optional: where you want the generated files
           output_path: pdfs
