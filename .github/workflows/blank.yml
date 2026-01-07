@@ -24,7 +24,7 @@ jobs:
 
       # upload them as artifacts so you can download them after the run
       - name: Upload generated PDFs/HTML
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: notes-pdfs
           path: pdfs
