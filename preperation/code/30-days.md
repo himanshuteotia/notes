@@ -1,4 +1,4 @@
-**No-nonsense 30-day LeetCode interview plan** that actually works.
+**30-day LeetCode interview plan**
 
 This is designed for **working developers** like you.
 ~2–3 hours/day.
