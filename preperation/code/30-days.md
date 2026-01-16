@@ -1,6 +1,6 @@
 **30-day LeetCode interview plan**
 
-This is designed for **working developers** like you.
+This is designed for **working developers**.
 ~2–3 hours/day.
 Patterns first, difficulty second.
 
